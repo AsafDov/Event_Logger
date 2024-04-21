@@ -1,45 +1,46 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
-    <style>
-        .hidden {
-            display: none;
-          }
-          .nested {
-            padding-left: 20px; /* Adjust indentation as needed */
-          }
-
-          .isActive{
-
-          }
-    </style>
-    <title>Event Logger</title>
-  </head>
-  <body class="bg-dark">
-
-    <div class="d-flex flex-row justify-content-center">
-
-        <div class="card p-3  mt-5 mr-3 ">
-            <h4 class="card-title">
-                Log Table
-            </h4>
-            <div class="card-body">
-                <table id="main-table" class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Event</th>
-                            <th>Creation Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for evnt in Events %}
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
+        <style>
+            .hidden {
+                display: none;
+            }
+            .nested {
+                padding-left: 20px; /* Adjust indentation as needed */
+            }
+            
+            .isActive{
+                
+            }
+        </style>
+        <title>Event Logger</title>
+    </head>
+    <body class="bg-dark">
+        {% csrf_token %}
+        
+        <div class="d-flex flex-row justify-content-center">
+            
+            <div class="card p-3 mt-5 mr-3 ">
+                <h4 class="card-title">
+                    Log Table
+                </h4>
+                <div class="card-body" style="overflow:overlay;">
+                    <table id="main-table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Creation Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for evnt in Events %}
                             <tr id={{evnt.name}} class="" style="cursor:Pointer" onClick=handleEventClick(this) >
                                 <td>
                                     {{evnt.name}}
@@ -48,26 +49,25 @@
                                     {{evnt.createDate}}
                                 </td>
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-
-        <div class="card p-3 w-50 mt-5 mr-3 ">
-            <h4 class="card-title">
-                Log Table
-            </h4>
-            <div class="card-body">
-                <table id="main-table" class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th class="w-25">Date</th>
-                            <th>Log</th>
-                        </tr>
-                    </thead>
+            
+            <div class="card p-3 w-50 mt-5 mr-3" style="height: 800px;">
+                <h4 class="card-title">
+                    Entries
+                </h4>
+                <div class="card-body" style="overflow:overlay;">
+                    <table id="main-table" class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th class="w-25">Date</th>
+                                <th>Log</th>
+                            </tr>
+                        </thead>
                     <tbody id="entryData">
-                        
                     </tbody>
                     <tfoot>
 
@@ -75,9 +75,6 @@
                 </table>
             </div>
             <div class="card-footer">
-                <button type="button" class="btn btn-info w-100" onClick=handleAddEntryButton(this)>
-                    <span class="material-icons">add_circle_outline</span>
-                </button>
             </div>
         </div>
     </div>
@@ -103,7 +100,7 @@
                 tableElement.removeChild(tableElement.firstChild);
             }
             fetch("/api/event/" + event.id).then(Response => Response.json()).then(data => {
-                for (let i = 0; i < data["entries"].length; i++) {
+                for (let i = data["entries"].length-1; i >=0; i--) {
                     console.log(data["entries"][i]);
                     const row = document.createElement("tr");
                     const entryElement = document.createElement("td");
@@ -115,7 +112,22 @@
                     tableElement.appendChild(row);
                 }
 
-            })
+            }).then(()=>{const newRow = document.createElement("tr");
+            const newCell = document.createElement("td");
+            newCell.colSpan="2";
+            const addButton = document.createElement("button");
+            addButton.className='btn btn-info w-100';
+            addButton.type ="button";
+            addButton.addEventListener("click", handleAddEntryButton);
+            const newSpan = document.createElement("span");
+            newSpan.className="material-icons";
+            newSpan.innerHTML = "add_circle_outline";
+
+            addButton.appendChild(newSpan);
+            newCell.appendChild(addButton);
+            newRow.appendChild(newCell);
+            tableElement.appendChild(newRow);});
+
         }
 
         function handleAddEntryButton(event){
@@ -130,38 +142,48 @@
             newCell.colSpan = "2";
     
             const sendButton = document.createElement("button");
-            sendButton.className='material-icons my-3 ';
+            sendButton.className='material-icons ml-1 btn-sm btn-success';
+            sendButton.id ="send";
             sendButton.innerHTML = "send";
             sendButton.Style='height:50px';
+            sendButton.addEventListener("click", handleAddEntry);
             
 
             // Create a new textbox element (input type="text")
             const newInput = document.createElement("textarea");
             newInput.type = "text";
+            newInput.id = "inputText";
             newInput.placeholder = "Enter your input";
             newInput.className = "align-self-stretch";
             newInput.style = "height:100px; width:90%; box-sizing: border-box; white-space:wrap; text-align:left; vertical-align:top"
             // Append the table cell to the new row
             newCell.appendChild(newInput);
+            newCell.appendChild(sendButton);
             newRow.appendChild(newCell);
-            newRow.appendChild(sendButton);
 
             // Append the new row to the table body
             tableElement.appendChild(newRow);
         };
 
         function handleAddEntry(event){
-            fetch('/addEntry/', {
+            sendElement = document.getElementById("send");
+            textElement = document.getElementById("inputText");
+            currentEventElement = document.getElementsByClassName("table-active")[0];
+            dataText = {"event":currentEventElement.id, "entry":textElement.value}
+            const csrfToken = document.body.getElementsByTagName('input')[0].value; // Access token from hidden field
+            
+            fetch('api/addEntry/', {
                 method: 'POST', // Can be GET, PUT, DELETE, etc.
-                body: JSON.stringify(data), // Convert data to JSON string
-                headers: { 'Content-Type': 'application/json' }, // Specify content type
+                body: JSON.stringify(dataText), // Convert data to JSON string
+                headers: { 'Content-Type': 'application/json',
+                            'csrfmiddlewaretoken': csrfToken }, // Specify content type
               }).then(response => response.json()) // Parse JSON response
               .then(data => {
                 console.log('Success:', data);
-              })
-              .catch(error => {
-                console.error('Error:', error);
               });
+
+              //window.location.reload();
+              handleEventClick(currentEventElement);
         }
 
         const table = document.getElementById('main-table');
