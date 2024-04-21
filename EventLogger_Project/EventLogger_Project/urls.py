@@ -21,4 +21,9 @@ from EventLogger import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
+    #path('<event>/', views.handleEventClick),
+    path('getEntry/', views.getEntry),
+    path('api/addEntry/', views.addEntry),
+    path('api/event/<event>/', views.getEntries),
+
 ]
