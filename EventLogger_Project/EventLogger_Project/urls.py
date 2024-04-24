@@ -25,5 +25,6 @@ urlpatterns = [
     path('getEntry/', views.getEntry),
     path('api/addEntry/', views.addEntry),
     path('api/event/<event>/', views.getEntries),
+    path('api/deleteEntry/', views.deleteEntry)
 
 ]

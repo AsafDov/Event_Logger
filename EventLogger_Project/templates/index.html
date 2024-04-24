@@ -17,9 +17,7 @@
                 padding-left: 20px; /* Adjust indentation as needed */
             }
             
-            .isActive{
-                
-            }
+
         </style>
         <title>Event Logger</title>
     </head>
@@ -110,21 +108,40 @@
                     const row = document.createElement("tr");
                     const entryElement = document.createElement("td");
                     const deleteElement = document.createElement("span");
-                    deleteElement.className="material-symbols-outlined";
+                    deleteElement.name = data["entries"][i]["entry"];
+                    deleteElement.id = data["entries"][i]["entryDate"];
+                    deleteElement.className="material-symbols-outlined pt-3";
                     deleteElement.innerHTML = "delete";
+                    deleteElement.style="cursor:Pointer;"
+                    deleteElement.addEventListener("click",handleDeleteEntry());
+
                     entryElement.style = "word-wrap: break-word;"
                     const dateElement = document.createElement("td");
                     entryElement.innerHTML = data["entries"][i]["entry"];
+                    //entryElement.className = data["entries"][i]["entry"];
                     dateElement.innerHTML = data["entries"][i]["entryDate"];
+                    //dateElement.className = data["entries"][i]["entryDate"];
                     row.appendChild(deleteElement);
                     row.appendChild(dateElement);
                     row.appendChild(entryElement);
                     tableElement.appendChild(row);
                 }
             }).then(createAddButton(tableElement));
+
         }
 
-        
+        function handleDeleteEntry(){
+            const csrfToken = document.body.getElementsByTagName('input')[0].value; // Access token from hidden field
+            const deleteElement = this;
+            const dataText = {"entry":this.name, "entryDate":deleteElement.id}
+            fetch('api/deleteEntry/', {
+                method: 'DELETE', // Can be GET, PUT, DELETE, etc.
+                body: JSON.stringify(dataText), // Convert data to JSON string
+                headers: { 'Content-Type': 'application/json',
+                            'csrfmiddlewaretoken': csrfToken }, // Specify content type
+              })
+        }
+
         function handleAddRowButton(event){
             const tableElement = document.getElementById("entryData");
               // Create a new table row element
@@ -195,7 +212,7 @@
             const newRow = document.createElement("tr");
             newRow.id = "addButtonRow";
             const newCell = document.createElement("td");
-            newCell.colSpan="2";
+            newCell.colSpan="3";
             const addButton = document.createElement("button");
             addButton.className='btn btn-info w-100';
             addButton.type ="button";

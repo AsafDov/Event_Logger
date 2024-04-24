@@ -47,3 +47,17 @@ def getEntries(request, event):
         entry = Entry.objects.filter(event=event)
         serializer = EntrySerializer(entry, many=True)
         return JsonResponse({"entries":serializer.data})
+
+@api_view(['DELETE'])
+def deleteEntry(request):
+    if request.method == 'DELETE':
+        print(request.data)
+        serializer = EntrySerializer(data=request.data)
+        if serializer.is_valid():
+            entry = Entry.objects.filter(dateTime=request.data)
+        
+        return JsonResponse({"entries":serializer.data})
+
+
+
+
