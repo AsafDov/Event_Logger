@@ -26,19 +26,28 @@ def handleEventClick(request, *args, **kwargs):
         return render(request, "index.html", context)
 
 @api_view(['GET'])
-def getEntry(request):
+def listEntries(request, event_id):
     if request.method == 'GET':
-        entry = Entry.objects.all()
+        entry = Entry.objects.filter(event=event_id)   
         serializer = EntrySerializer(entry, many=True)
-        return JsonResponse({"entries":serializer.data})
+        return Response(serializer.data)
 
-@api_view(['POST'])
+@api_view(['GET'])
+def listEvents(request):
+    if request.method == 'GET':
+        data = Event.objects.all()
+        serializer = EventSerializer(data, many=True)
+        return Response(serializer.data)
+    
+@api_view(['POST', 'GET'])
+@csrf_exempt
 def addEntry(request):
+    print(request.data)
     serializer = EntrySerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-    return Response(serializer.data)
+    return Response("Save Failed")
 
 # Returning the entries for a specific event
 @api_view(['GET'])
@@ -52,12 +61,20 @@ def getEntries(request, event):
 def deleteEntry(request):
     if request.method == 'DELETE':
         print(request.data)
-        serializer = EntrySerializer(data=request.data)
-        if serializer.is_valid():
-            entry = Entry.objects.filter(dateTime=request.data)
-        
-        return JsonResponse({"entries":serializer.data})
+        event = request.data["event"]
+        entryData = request.data["entry"]
+        entryDate = request.data["entryDate"]
+        entry = Entry.objects.get(event=event, entry=entryData)
+        entry.delete() 
+        return Response("Item deleted")
+    
 
+@api_view(['GET'])
+def getEntry(request, event, id):
+    if request.method == 'GET':
+        entry = Entry.objects.filter(pk=id, event=event)
+        serializer = EntrySerializer(entry, many=True)
+        return Response(serializer.data)
 
 
 

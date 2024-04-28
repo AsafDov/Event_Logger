@@ -7,3 +7,10 @@ class EntrySerializer(serializers.ModelSerializer):
         fields = ['event', 'entry', 'entryDate']
     
     entryDate = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)
+
+class EventSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Event
+        fields = '__all__'
+    
+    entryDate = serializers.DateTimeField(format="%d-%m-%Y %H:%M:%S", read_only=True)

@@ -22,9 +22,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home),
     #path('<event>/', views.handleEventClick),
-    path('getEntry/', views.getEntry),
+    path('api/listEntries/<str:event_id>', views.listEntries),
+    path('api/listEvents/', views.listEvents),
     path('api/addEntry/', views.addEntry),
-    path('api/event/<event>/', views.getEntries),
-    path('api/deleteEntry/', views.deleteEntry)
+    path('api/event/<str:event>/', views.getEntries),
+    path('api/event/<str:event>/<str:id>/', views.getEntry),
+    path('api/deleteEntry/', views.deleteEntry),
 
 ]

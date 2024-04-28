@@ -17,7 +17,9 @@
                 padding-left: 20px; /* Adjust indentation as needed */
             }
             
-
+            body {
+                user-select: none
+            }
         </style>
         <title>Event Logger</title>
     </head>
@@ -40,7 +42,7 @@
                         </thead>
                         <tbody>
                             {% for evnt in Events %}
-                            <tr id={{evnt.name}} class="" style="cursor:Pointer" onClick=handleEventClick(this) >
+                            <tr id={{evnt.id}} name={{evnt.id}} class="" style="cursor:Pointer" onClick=handleEventClick(this) >
                                 <td>
                                     {{evnt.name}}
                                 </td>
@@ -91,11 +93,10 @@
             const activeRows = document.getElementsByClassName("table-active");
             for(let i = 0; i < activeRows.length; i++){
                 activeRows[i].className = "";
-            } 
-            thisElement.classList.add("table-active");
+            }
+            if(thisElement.classList)
+                thisElement.classList.add("table-active");
 
-
-            console.log(event.id);
             const eventName = event.id;
             const tableElement = document.getElementById("entryData");
             // Delete all data first:
@@ -104,16 +105,15 @@
             }
             fetch("/api/event/" + event.id).then(Response => Response.json()).then(data => {
                 for (let i = data["entries"].length-1; i >=0; i--) {
-                    console.log(data["entries"][i]);
                     const row = document.createElement("tr");
                     const entryElement = document.createElement("td");
                     const deleteElement = document.createElement("span");
-                    deleteElement.name = data["entries"][i]["entry"];
-                    deleteElement.id = data["entries"][i]["entryDate"];
+                    deleteElement.name = event.id;
+                    deleteElement.id = i+1;
                     deleteElement.className="material-symbols-outlined pt-3";
                     deleteElement.innerHTML = "delete";
                     deleteElement.style="cursor:Pointer;"
-                    deleteElement.addEventListener("click",handleDeleteEntry());
+                    deleteElement.addEventListener("click",handleDeleteEntry);
 
                     entryElement.style = "word-wrap: break-word;"
                     const dateElement = document.createElement("td");
@@ -133,12 +133,21 @@
         function handleDeleteEntry(){
             const csrfToken = document.body.getElementsByTagName('input')[0].value; // Access token from hidden field
             const deleteElement = this;
-            const dataText = {"entry":this.name, "entryDate":deleteElement.id}
-            fetch('api/deleteEntry/', {
+            const eventElement = document.getElementsByClassName("table-active")[0];
+            const event = document.getElementsByClassName("table-active")[0].id;
+            const id=this.id;
+            const entry = this.parentElement.childNodes[2].innerHTML;
+            const entryDate = this.parentElement.childNodes[1].innerHTML;
+            const payload = {"event":event, "entry":entry, "entryDate":entryDate}
+            const dataText = {"event":event, "id":this.id}
+            fetch(`api/deleteEntry/`,{
                 method: 'DELETE', // Can be GET, PUT, DELETE, etc.
-                body: JSON.stringify(dataText), // Convert data to JSON string
+                body: JSON.stringify(payload), // Convert data to JSON string
                 headers: { 'Content-Type': 'application/json',
-                            'csrfmiddlewaretoken': csrfToken }, // Specify content type
+                            'csrfmiddlewaretoken': csrfToken,
+                            'X-CSRFToken': csrfToken, }, // Specify content type
+              }).then(response => {
+                handleEventClick(eventElement);
               })
         }
 
@@ -155,7 +164,7 @@
 
              // Create a new table cell element
             const newCell = document.createElement("td");
-            newCell.colSpan = "2";
+            newCell.colSpan = "3";
     
             const sendButton = document.createElement("button");
             sendButton.className='material-icons ml-1 btn-sm btn-success';
@@ -180,30 +189,33 @@
             // Append the new row to the table body
             //tableElement.appendChild(newRow);
 
-            document.addEventListener('keydown', function(event) {
-                if (event.shiftKey && event.keyCode === 13) {
+            document.addEventListener('keyup', function(event) {
+                once = true;
+                if (once && event.shiftKey && event.keyCode === 13) {
                     handleAddEntry(event);
+                    once=false;
                 }
               });
         };
 
         // The send button that adds the entry
         function handleAddEntry(event){
-            sendElement = document.getElementById("send");
-            textElement = document.getElementById("inputText");
-            currentEventElement = document.getElementsByClassName("table-active")[0];
-            dataText = {"event":currentEventElement.id, "entry":textElement.value}
             const csrfToken = document.body.getElementsByTagName('input')[0].value; // Access token from hidden field
+            const sendElement = document.getElementById("send");
+            const textElement = document.getElementById("inputText");
+            const currentEventElement = document.getElementsByClassName("table-active")[0];
+            const dataText = {"event":parseInt(currentEventElement.id), "entry":textElement.value}
             
             fetch('api/addEntry/', {
                 method: 'POST', // Can be GET, PUT, DELETE, etc.
                 body: JSON.stringify(dataText), // Convert data to JSON string
                 headers: { 'Content-Type': 'application/json',
-                            'csrfmiddlewaretoken': csrfToken }, // Specify content type
+                            'csrfmiddlewaretoken': csrfToken,
+                            'X-CSRFToken': csrfToken, }, // Specify content type
               }).then(response => response.json()) // Parse JSON response
               .then(data => {
-                console.log('Success:', data);
-              }).then(handleEventClick(currentEventElement));
+                console.log('Added data successfully:', data);
+              }).then(() => handleEventClick(currentEventElement));
 
               //window.location.reload();
         }
