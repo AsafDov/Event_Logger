@@ -19,6 +19,20 @@
             
             body {
                 user-select: none
+                overflow:hidden;
+                position: fixed;
+                width:100%;
+                height:100%;
+                caret-color: transparent;
+            }
+            .card{
+                user-select: none;
+                height:85vh;
+            }
+            .card-body{
+                height:auto;
+                overflow:overlay;
+                user-select: none;
             }
         </style>
         <title>Event Logger</title>
@@ -32,7 +46,7 @@
                 <h4 class="card-title">
                     Log Table
                 </h4>
-                <div class="card-body" style="overflow:overlay;">
+                <div class="card-body" >
                     <table id="main-table" class="table table-hover">
                         <thead>
                             <tr>
@@ -54,13 +68,21 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="card-footer">
+                    <div class="btn btn-sm btn-secondary" onclick=loadEvents(this) style: "cursor:pointer">
+                        Reload
+                    </div>
+                    <a class="btn btn-sm btn-secondary" href="{% url 'exportCSV' model_name='Event'%}" style: "cursor:pointer">
+                        CSV
+                    </a>
+                </div>
             </div>
             
-            <div class="card p-3 w-50 mt-5 mr-3" style="height: 800px;">
+            <div class="card p-3 w-50 mt-5 mr-3" style="">
                 <h4 class="card-title">
                     Entries
                 </h4>
-                <div class="card-body" style="overflow:overlay;">
+                <div class="card-body" style="">
                     <table id="main-table" class="table table-hover">
                         <thead>
                             <tr>
@@ -110,7 +132,7 @@
                     const deleteElement = document.createElement("span");
                     deleteElement.name = event.id;
                     deleteElement.id = i+1;
-                    deleteElement.className="material-symbols-outlined pt-3";
+                    deleteElement.className="material-symbols-outlined pt-3 pr-0";
                     deleteElement.innerHTML = "delete";
                     deleteElement.style="cursor:Pointer;"
                     deleteElement.addEventListener("click",handleDeleteEntry);
@@ -237,6 +259,12 @@
             newCell.appendChild(addButton);
             newRow.appendChild(newCell);
             tableElement.appendChild(newRow);
+        }
+
+        function loadEvents(event){
+            fetch('api/loadEvents/').then(data => {
+                console.log('Loaded data successfully:');
+              }).then(handleEventClick());
         }
 
     </script>

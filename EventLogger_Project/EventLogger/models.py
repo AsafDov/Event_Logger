@@ -2,12 +2,13 @@ from django.db import models
 from django.db.utils import IntegrityError
 import os
 import time
-import json
-import manage
 
 class Event(models.Model):
     name = models.CharField(max_length=200, unique=True)
     createDate = models.CharField(max_length=50)
+
+    class Meta:
+        ordering = ['-createDate']
     
     def __str__(self):
         return f"Event: {self.name}"
@@ -15,26 +16,25 @@ class Event(models.Model):
     def populate(self, path="C:\\Users\\nathe\\Desktop\\Projects\\EventLogger\\Test"):
         results = []
         allEvents = Event.objects.all()
-        for f in os.listdir(path):
-            if f.endswith('.txt'):
-                created = time.ctime(os.path.getctime(path + "/" + f))
-                event = {
-                    "name": f,
-                    "createDate":created
-                }
-                try:
-                    Event.objects.get(name=event["name"])
-                    continue
-                except Event.DoesNotExist:
-                    e = Event(name=event["name"], createDate=event["createDate"] )
-                    e.save()
-                    continue
+        for (root, dirs, file) in os.walk(path):
+            for f in file:
+                if '.gcd' in f or '.gcm' in f: #Change to txt for testing
+                    created = time.ctime(os.path.getctime(root + "\\" + f))
+                    event = {
+                        "name": f,
+                        "createDate":created
+                    }
+                    try:
+                        Event.objects.get(name=event["name"])
+                        continue
+                    except Event.DoesNotExist:
+                        e = Event(name=event["name"], createDate=event["createDate"] )
+                        e.save()
+                        continue
 
         results.append(event)
         return (results)
 
-eventDB = Event()
-eventDB.populate()
 
 
 class Entry(models.Model):

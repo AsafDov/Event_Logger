@@ -20,7 +20,7 @@ from EventLogger import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.home),
+    path('', views.home, name="home"),
     #path('<event>/', views.handleEventClick),
     path('api/listEntries/<str:event_id>', views.listEntries),
     path('api/listEvents/', views.listEvents),
@@ -28,5 +28,7 @@ urlpatterns = [
     path('api/event/<str:event>/', views.getEntries),
     path('api/event/<str:event>/<str:id>/', views.getEntry),
     path('api/deleteEntry/', views.deleteEntry),
+    path('api/loadEvents/', views.loadEvents),
+    path('api/exportCSV/<str:model_name>/', views.export_data_to_csv, name="exportCSV"),
 
 ]
