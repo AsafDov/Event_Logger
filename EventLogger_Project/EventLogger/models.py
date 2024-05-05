@@ -17,22 +17,22 @@ class Event(models.Model):
         results = []
         allEvents = Event.objects.all()
         for (root, dirs, file) in os.walk(path):
-            for f in file:
-                if '.gcd' in f or '.gcm' in f: #Change to txt for testing
-                    created = time.ctime(os.path.getctime(root + "\\" + f))
-                    event = {
-                        "name": f,
-                        "createDate":created
-                    }
-                    try:
-                        Event.objects.get(name=event["name"])
-                        continue
-                    except Event.DoesNotExist:
-                        e = Event(name=event["name"], createDate=event["createDate"] )
-                        e.save()
-                        continue
-
-        results.append(event)
+            for d in dirs:
+                for f in file:
+                    if '.gcd' in f or '.gcm' in f: #Change to txt for testing
+                        created = time.ctime(os.path.getctime(root + "\\" + d + "\\" + f))
+                        event = {
+                            "name": f,
+                            "createDate":created
+                        }
+                        try:
+                            Event.objects.get(name=event["name"])
+                            results.append(event)
+                            continue
+                        except Event.DoesNotExist:
+                            e = Event(name=event["name"], createDate=event["createDate"] )
+                            e.save()
+                            continue
         return (results)
 
 
