@@ -28,7 +28,7 @@ Here is a look at the user interface of the **Event Logger**:
 
   * **Python**: Core programming language.
   * **Django**: High-level Python web framework for rapid development and clean, pragmatic design.
-  * **MySQL**: Robust, open-source relational database for data storage.
+  * **SQLite**: Robust, open-source relational database for data storage.
 
 ### Frontend
 
